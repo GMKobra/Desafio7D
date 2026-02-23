@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Desafio 7D — Guardian Mind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cyan: #00d4ff; --purple: #b026ff; --pink: #ff26a0;
+    --bg: #030818; --bg2: #060f20; --card: #ffffff0d;
+    --border: #ffffff25; --text: #f0f4f8; --muted: #a0b0c0;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Exo 2', sans-serif; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: #0a0a12; } ::-webkit-scrollbar-thumb { background: #2a3545; }
+
+  /* PARTICLES */
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle { position: absolute; border-radius: 50%; animation: floatP linear infinite; }
+  @keyframes floatP { 0%{transform:translateY(100vh) scale(0);opacity:0} 10%{opacity:1} 90%{opacity:0.3} 100%{transform:translateY(-10vh) scale(1);opacity:0} }
+
+  /* SCREENS */
+  .screen { min-height: 100vh; position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; }
+  .screen.active { display: flex; }
+
+  /* REGISTER SCREEN */
+  #screen-register { justify-content: center; padding: 32px 24px; background: radial-gradient(ellipse at 50% 0%, #00d4ff0a 0%, transparent 60%), var(--bg); }
+  .register-wrap { width: 100%; max-width: 400px; text-align: center; }
+  .logo-svg { margin-bottom: 28px; }
+  .brand-tag { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 5px; color: #00d4ff88; margin-bottom: 10px; }
+  .main-title { font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .main-title span { color: var(--cyan); }
+  .subtitle { font-size: 11px; letter-spacing: 4px; color: var(--muted); margin-bottom: 8px; }
+  .tagline { font-size: 14px; color: #b8c8d8; line-height: 1.7; margin-bottom: 36px; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .phases-preview { display: flex; gap: 10px; margin-bottom: 36px; }
+  .phase-chip { flex: 1; padding: 10px 8px; border-radius: 12px; text-align: center; }
+  .phase-chip .pname { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; margin-bottom: 3px; }
+  .phase-chip .pdays { font-size: 10px; color: #a0b4c8; }
+  .form-group { margin-bottom: 16px; text-align: left; }
+  .form-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-bottom: 6px; display: block; font-family: 'Cinzel', serif; }
+  .form-input { width: 100%; background: #ffffff10; border: 1px solid #ffffff30; border-radius: 12px; padding: 14px 18px; color: #fff; font-family: 'Exo 2', sans-serif; font-size: 15px; outline: none; transition: all 0.3s; }
+  .form-input:focus { border-color: var(--cyan); box-shadow: 0 0 20px #00d4ff22; }
+  .form-input::placeholder { color: #96a8b8; }
+  .btn-primary { width: 100%; padding: 16px; border-radius: 50px; border: none; background: linear-gradient(135deg, var(--cyan), #0099cc); color: #000; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 30px #00d4ff44; font-weight: 700; margin-top: 8px; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px #00d4ff66; }
+  .privacy-note { font-size: 11px; color: #a0b4c4; margin-top: 14px; }
+
+  /* HOME SCREEN */
+  #screen-home { background: radial-gradient(ellipse at 50% -10%, #00d4ff08 0%, transparent 50%), var(--bg); padding-bottom: 40px; }
+  .home-header { width: 100%; max-width: 480px; padding: 40px 20px 24px; text-align: center; }
+  .greeting { font-size: 12px; letter-spacing: 3px; color: #a0b4c8; margin-bottom: 4px; }
+  .user-name-display { font-family: 'Cinzel', serif; font-size: 22px; color: var(--cyan); margin-bottom: 20px; }
+  .progress-wrap { background: #ffffff0f; border: 1px solid #ffffff28; border-radius: 20px; padding: 20px; margin-bottom: 24px; }
+  .progress-top { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+  .progress-ring-wrap { flex-shrink: 0; }
+  .progress-info { text-align: left; }
+  .progress-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; color: var(--cyan); margin-bottom: 4px; }
+  .progress-count { font-size: 18px; font-weight: 600; }
+  .progress-sub { font-size: 12px; color: #a8bacc; margin-top: 2px; }
+  .progress-bar-track { height: 4px; background: #ffffff10; border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--cyan), var(--purple)); transition: width 0.8s ease; }
+  .home-content { width: 100%; max-width: 480px; padding: 0 20px; }
+  .section-title { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 4px; color: #a8bece; margin-bottom: 14px; }
+  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; }
+  .day-cell { aspect-ratio: 1; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; position: relative; border: 1px solid var(--border); background: var(--card); }
+  .day-cell.done { background: #00d4ff15; border-color: #00d4ff44; }
+  .day-cell.active { animation: pulse-cell 2s infinite; }
+  .day-cell.locked { opacity: 0.3; cursor: not-allowed; }
+  .day-cell.phase2 { border-color: #b026ff22; }
+  .day-cell.phase2.done { background: #b026ff15; border-color: #b026ff44; }
+  .day-cell.phase3 { border-color: #ff26a022; }
+  .day-cell.phase3.done { background: #ff26a015; border-color: #ff26a044; }
+  .day-cell.active { border-color: var(--cyan) !important; box-shadow: 0 0 16px #00d4ff33; }
+  @keyframes pulse-cell { 0%,100%{box-shadow:0 0 16px #00d4ff33} 50%{box-shadow:0 0 28px #00d4ff66} }
+  .day-cell-emoji { font-size: 18px; }
+  .day-cell-num { font-size: 8px; color: #a0b4c4; margin-top: 2px; font-family: 'Cinzel', serif; }
+  .phases-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .phase-row { display: flex; align-items: center; gap: 14px; background: #ffffff0f; border: 1px solid #ffffff22; border-radius: 16px; padding: 14px 16px; }
+  .phase-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; }
+  .phase-info { flex: 1; }
+  .phase-row-name { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px; margin-bottom: 2px; }
+  .phase-row-desc { font-size: 12px; color: var(--muted); }
+  .phase-count { font-size: 12px; color: var(--muted); }
+  .start-btn { display: block; width: 100%; padding: 16px; border-radius: 50px; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px; transition: all 0.3s; font-weight: 700; }
+  .btn-outline { background: transparent; border: 1px solid var(--cyan) !important; color: var(--cyan); }
+  .locked-msg { text-align: center; padding: 12px; font-size: 12px; color: #a0b0c4; letter-spacing: 2px; font-family: 'Cinzel', serif; }
+
+  /* DAY SCREEN */
+  #screen-day { background: var(--bg); padding-bottom: 60px; }
+  .day-topbar { position: sticky; top: 0; z-index: 50; background: #030818ee; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; width: 100%; }
+  .topbar-back { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 22px; padding: 4px; line-height: 1; }
+  .topbar-center { text-align: center; }
+  .topbar-phase { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; margin-bottom: 2px; }
+  .topbar-day { font-family: 'Cinzel', serif; font-size: 14px; }
+  .duration-tag { padding: 5px 14px; border-radius: 50px; font-size: 10px; letter-spacing: 2px; font-family: 'Cinzel', serif; }
+  .day-content { width: 100%; max-width: 480px; padding: 24px 20px; }
+  .day-hero { text-align: center; margin-bottom: 28px; }
+  .day-emoji-big { font-size: 60px; display: block; margin-bottom: 18px; animation: floatEmoji 3s ease-in-out infinite; }
+  @keyframes floatEmoji { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .day-title { font-family: 'Cinzel', serif; font-size: 26px; line-height: 1.2; margin-bottom: 16px; }
+  .quote-card { padding: 16px 20px; border-radius: 14px; border-left: 3px solid; margin-bottom: 20px; }
+  .quote-text { font-size: 13px; font-style: italic; line-height: 1.8; }
+  .day-desc { color: #b8c8d8; line-height: 1.9; font-size: 14px; margin-bottom: 28px; }
+  .tabs { display: flex; gap: 4px; background: #ffffff08; border-radius: 50px; padding: 4px; margin-bottom: 24px; }
+  .tab-btn { flex: 1; padding: 9px 0; border-radius: 50px; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; transition: all 0.3s; background: transparent; color: var(--muted); }
+  .tab-btn.active { color: #000; font-weight: 700; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  /* PRACTICE TAB */
+  .practice-card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+  .practice-title { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 3px; margin-bottom: 18px; }
+  .step-item { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; border: 1px solid; }
+  .step-text { color: #dce8f0; line-height: 1.7; font-size: 14px; padding-top: 4px; }
+  /* BREATHING TAB */
+  .breath-section { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .breath-intro { color: #b8c8d8; font-size: 13px; line-height: 1.8; text-align: center; max-width: 300px; }
+  .breath-circle-wrap { position: relative; width: 160px; height: 160px; }
+  .breath-circle { width: 100%; height: 100%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 1.2s cubic-bezier(0.4,0,0.2,1); border: 2px solid; position: relative; }
+  .breath-label { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 2px; }
+  .breath-count { font-size: 38px; font-weight: 700; line-height: 1; }
+  .breath-tip { background: var(--card); border-radius: 14px; padding: 14px 18px; width: 100%; text-align: center; border: 1px solid var(--border); }
+  .breath-tip-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; margin-bottom: 6px; }
+  .breath-tip-text { font-size: 13px; color: #b8c8d8; line-height: 1.6; }
+  /* JOURNAL TAB */
+  .journal-intro { font-size: 13px; color: #b8c8d8; line-height: 1.8; margin-bottom: 20px; }
+  .journal-card { background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 14px; border: 1px solid var(--border); }
+  .journal-question { font-size: 13px; font-style: italic; line-height: 1.7; margin-bottom: 12px; }
+  .journal-textarea { width: 100%; background: #ffffff0d; border: 1px solid #ffffff22; border-radius: 10px; padding: 12px 14px; color: #fff; font-family: 'Exo 2', sans-serif; font-size: 14px; line-height: 1.7; resize: none; outline: none; transition: border-color 0.3s; }
+  .journal-textarea:focus { border-color: currentColor; }
+  /* COMPLETE BTN */
+  .complete-wrap { margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .btn-complete { padding: 16px 48px; border-radius: 50px; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 3px; font-weight: 700; transition: all 0.3s; }
+  .done-badge { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .done-check { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .done-label { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px; }
+  .next-day-btn { padding: 12px 32px; border-radius: 50px; background: transparent; cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px; transition: all 0.3s; }
+  /* DAY MINI NAV */
+  .day-mini-nav { display: flex; gap: 6px; justify-content: center; margin-top: 32px; }
+  .mini-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Cinzel', serif; font-size: 10px; transition: all 0.3s; border: 1px solid var(--border); background: var(--card); color: var(--muted); }
+  .mini-dot.current { color: #000; font-weight: 700; }
+  .mini-dot.done-d { }
+  .mini-dot.locked-d { opacity: 0.3; cursor: not-allowed; }
+
+  /* CELEBRATION SCREEN */
+  #screen-celebrate { justify-content: center; align-items: center; text-align: center; padding: 40px 24px; }
+  .celebrate-emoji { font-size: 80px; animation: bounceIn 0.5s ease; margin-bottom: 20px; }
+  @keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .celebrate-day { font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 4px; margin-bottom: 8px; }
+  .celebrate-title { font-family: 'Cinzel', serif; font-size: 28px; margin-bottom: 16px; }
+  .celebrate-quote { font-size: 14px; color: #b8c8d8; line-height: 1.8; max-width: 300px; font-style: italic; }
+
+  /* COMPLETION SCREEN */
+  #screen-complete { justify-content: center; padding: 40px 24px; background: radial-gradient(ellipse at 50% 0%, #ff26a015 0%, transparent 60%), var(--bg); }
+  .complete-wrap-screen { max-width: 420px; width: 100%; text-align: center; }
+  .complete-trophy { font-size: 72px; margin-bottom: 24px; animation: floatEmoji 3s ease-in-out infinite; }
+  .complete-brand { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 5px; color: #ff26a088; margin-bottom: 10px; }
+  .complete-title { font-family: 'Cinzel', serif; font-size: 30px; line-height: 1.2; margin-bottom: 20px; }
+  .complete-phases { display: flex; gap: 8px; margin-bottom: 28px; }
+  .complete-phase { flex: 1; padding: 12px 8px; border-radius: 14px; text-align: center; background: var(--card); }
+  .complete-phase-name { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
+  .complete-phase-desc { font-size: 10px; color: var(--muted); }
+  .complete-quote { font-style: italic; color: #b8c8d8; line-height: 1.8; font-size: 14px; margin-bottom: 32px; }
+  .complete-cta { display: block; padding: 14px 32px; border-radius: 50px; border: 1px solid var(--pink); color: var(--pink); background: transparent; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px; cursor: pointer; margin: 0 auto; transition: all 0.3s; }
+  .complete-cta:hover { background: #ff26a015; }
+  .site-link { font-size: 11px; color: #8090a0; margin-top: 28px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1: REGISTER
+═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-register">
+  <div class="register-wrap">
+    <div class="logo-svg">
+      <svg width="72" height="72" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="#00d4ff" stroke-opacity="0.3" stroke-width="1.5"/>
+        <polygon points="50,8 88,78 12,78" stroke="#00d4ff" stroke-width="2.5" fill="none"/>
+        <polygon points="50,34 70,68 30,68" stroke="#00d4ff" stroke-opacity="0.6" stroke-width="1.5" fill="none"/>
+        <circle cx="50" cy="54" r="9" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+        <ellipse cx="50" cy="54" rx="14" ry="4.5" stroke="#00d4ff" stroke-opacity="0.7" stroke-width="1" fill="none"/>
+        <line x1="50" y1="45" x2="50" y2="63" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="brand-tag">GUARDIAN MIND</div>
+    <h1 class="main-title">DESAFIO <span>7D</span></h1>
+    <p class="subtitle">7 DIAS PARA SAIR DO CAOS</p>
+    <p class="tagline">Reconquiste sua mente. Fortaleça seu corpo. Domine seu destino. Em 7 dias.</p>
+    <div class="phases-preview">
+      <div class="phase-chip" style="background:#00d4ff12;border:1px solid #00d4ff33">
+        <div class="pname" style="color:#00d4ff">A RECONQUISTA</div>
+        <div class="pdays">Dias 1–3</div>
+      </div>
+      <div class="phase-chip" style="background:#b026ff12;border:1px solid #b026ff33">
+        <div class="pname" style="color:#b026ff">A FORTALEZA</div>
+        <div class="pdays">Dias 4–5</div>
+      </div>
+      <div class="phase-chip" style="background:#ff26a012;border:1px solid #ff26a033">
+        <div class="pname" style="color:#ff26a0">O DOMÍNIO</div>
+        <div class="pdays">Dias 6–7</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="reg-name">SEU NOME</label>
+      <input class="form-input" id="reg-name" type="text" placeholder="Como posso te chamar?" autocomplete="given-name">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="reg-email">SEU EMAIL</label>
+      <input class="form-input" id="reg-email" type="email" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <button class="btn-primary" onclick="startChallenge()">INICIAR MINHA JORNADA 🛡️</button>
+    <p class="privacy-note">🔒 Seus dados ficam salvos apenas neste dispositivo</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2: HOME / DASHBOARD
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-home">
+  <div class="home-header">
+    <div class="greeting">BEM-VINDO DE VOLTA,</div>
+    <div class="user-name-display" id="home-username">GUARDIÃO</div>
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <div class="progress-ring-wrap">
+          <svg width="64" height="64" viewBox="0 0 64 64" id="progress-svg">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#ffffff10" stroke-width="4"/>
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#00d4ff" stroke-width="4"
+              stroke-dasharray="0 164" stroke-linecap="round" transform="rotate(-90 32 32)"
+              id="progress-circle" style="transition:stroke-dasharray 0.8s ease"/>
+            <text x="32" y="37" text-anchor="middle" fill="#fff" font-size="13" font-family="'Cinzel',serif" id="progress-text">0</text>
+          </svg>
+        </div>
+        <div class="progress-info">
+          <div class="progress-label">JORNADA GUARDIÃ</div>
+          <div class="progress-count" id="progress-count-text">0 de 7 dias</div>
+          <div class="progress-sub" id="progress-sub-text">Pronto para começar?</div>
+        </div>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="home-content">
+    <div class="section-title">SEU PROGRESSO</div>
+    <div class="days-grid" id="days-grid"></div>
+    <div class="section-title">AS 3 FASES</div>
+    <div class="phases-list">
+      <div class="phase-row">
+        <div class="phase-icon" style="background:#00d4ff15;border:1px solid #00d4ff44;color:#00d4ff">F1</div>
+        <div class="phase-info">
+          <div class="phase-row-name" style="color:#00d4ff">A RECONQUISTA</div>
+          <div class="phase-row-desc">Silêncio, Presença e Foco — Dias 1–3</div>
+        </div>
+        <div class="phase-count" id="phase1-count">0/3</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-icon" style="background:#b026ff15;border:1px solid #b026ff44;color:#b026ff">F2</div>
+        <div class="phase-info">
+          <div class="phase-row-name" style="color:#b026ff">A FORTALEZA</div>
+          <div class="phase-row-desc">Disciplina e Proteção Energética — Dias 4–5</div>
+        </div>
+        <div class="phase-count" id="phase2-count">0/2</div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-icon" style="background:#ff26a015;border:1px solid #ff26a044;color:#ff26a0">F3</div>
+        <div class="phase-info">
+          <div class="phase-row-name" style="color:#ff26a0">O DOMÍNIO</div>
+          <div class="phase-row-desc">Consciência e Integração — Dias 6–7</div>
+        </div>
+        <div class="phase-count" id="phase3-count">0/2</div>
+      </div>
+    </div>
+    <button class="start-btn btn-primary" id="home-main-btn" onclick="goToCurrentDay()">CONTINUAR JORNADA</button>
+    <div class="locked-msg" id="locked-msg" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3: DAY DETAIL
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-day">
+  <div class="day-topbar">
+    <button class="topbar-back" onclick="showScreen('home')">←</button>
+    <div class="topbar-center">
+      <div class="topbar-phase" id="tb-phase"></div>
+      <div class="topbar-day" id="tb-day"></div>
+    </div>
+    <div class="duration-tag" id="tb-duration"></div>
+  </div>
+  <div class="day-content" style="width:100%;max-width:480px;margin:0 auto">
+    <div class="day-hero">
+      <span class="day-emoji-big" id="day-emoji"></span>
+      <h2 class="day-title" id="day-title"></h2>
+      <div class="quote-card" id="day-quote-card">
+        <div class="quote-text" id="day-quote"></div>
+      </div>
+    </div>
+    <p class="day-desc" id="day-desc"></p>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-practice-btn" onclick="switchTab('practice')">PRÁTICA</button>
+      <button class="tab-btn" id="tab-breath-btn" onclick="switchTab('breath')">RESPIRAÇÃO</button>
+      <button class="tab-btn" id="tab-journal-btn" onclick="switchTab('journal')">DIÁRIO</button>
+    </div>
+    <!-- Practice -->
+    <div class="tab-content active" id="tab-practice">
+      <div class="practice-card" id="practice-card">
+        <div class="practice-title" id="practice-title"></div>
+        <div id="steps-list"></div>
+      </div>
+    </div>
+    <!-- Breathing -->
+    <div class="tab-content" id="tab-breath">
+      <div class="breath-section">
+        <p class="breath-intro" id="breath-intro-text">Clique no círculo para iniciar a respiração guiada. Deixe o ritmo te ancorar no agora.</p>
+        <div class="breath-circle-wrap">
+          <div class="breath-circle" id="breath-circle" onclick="toggleBreath()">
+            <div class="breath-label" id="breath-label">INICIAR</div>
+            <div class="breath-count" id="breath-count" style="display:none"></div>
+          </div>
+        </div>
+        <div class="breath-tip">
+          <div class="breath-tip-label" id="breath-tip-label" style="font-family:'Cinzel',serif;letter-spacing:2px;font-size:9px;margin-bottom:6px"></div>
+          <p class="breath-tip-text" id="breath-tip-text"></p>
+        </div>
+      </div>
+    </div>
+    <!-- Journal -->
+    <div class="tab-content" id="tab-journal">
+      <p class="journal-intro">Reflita com honestidade. Seu Diário Guardião é seu espaço sagrado.</p>
+      <div id="journal-questions"></div>
+    </div>
+    <!-- Complete -->
+    <div class="complete-wrap" id="complete-wrap">
+      <button class="btn-complete" id="complete-btn" onclick="completeDay()"></button>
+    </div>
+    <div class="done-badge" id="done-badge" style="display:none;margin-top:32px;flex-direction:column;align-items:center;gap:10px">
+      <div class="done-check" id="done-check">✓</div>
+      <div class="done-label" id="done-label"></div>
+      <button class="next-day-btn" id="next-btn" onclick="goNextDay()" style="display:none"></button>
+    </div>
+    <div class="day-mini-nav" id="day-mini-nav"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 4: CELEBRATION
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-celebrate" style="background:var(--bg)">
+  <div class="celebrate-emoji" id="cel-emoji"></div>
+  <div class="celebrate-day" id="cel-day-label"></div>
+  <div class="celebrate-title" id="cel-title"></div>
+  <p class="celebrate-quote" id="cel-quote"></p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 5: FULL COMPLETION
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-complete">
+  <div class="complete-wrap-screen">
+    <div class="complete-trophy">⚡</div>
+    <div class="complete-brand">GUARDIAN MIND</div>
+    <h2 class="complete-title">VOCÊ ENCONTROU<br><span style="color:#ff26a0">O DOMÍNIO</span></h2>
+    <div class="complete-phases">
+      <div class="complete-phase" style="border:1px solid #00d4ff33">
+        <div class="complete-phase-name" style="color:#00d4ff">RECONQUISTA</div>
+        <div class="complete-phase-desc">Silêncio e Foco</div>
+      </div>
+      <div class="complete-phase" style="border:1px solid #b026ff33">
+        <div class="complete-phase-name" style="color:#b026ff">FORTALEZA</div>
+        <div class="complete-phase-desc">Energia e Limite</div>
+      </div>
+      <div class="complete-phase" style="border:1px solid #ff26a033">
+        <div class="complete-phase-name" style="color:#ff26a0">DOMÍNIO</div>
+        <div class="complete-phase-desc">Paz e Presença</div>
+      </div>
+    </div>
+    <p class="complete-quote">"A Mente Guardiã não busca controlar, busca compreender. E na compreensão, encontra paz."</p>
+    <a href="https://guardianmind.org" target="_blank" class="complete-cta">CONTINUAR EM GUARDIANMIND.ORG 🛡️</a>
+    <div class="site-link">guardianmind.org</div>
+  </div>
+</div>
+
+<script>
+// ╔═══════════════════════════════════════════════════════════╗
+// ║        GUARDIAN MIND — INTEGRAÇÃO GOOGLE SHEETS           ║
+// ║                                                           ║
+// ║  PASSO 1: Crie o script no Google Sheets (veja abaixo)   ║
+// ║  PASSO 2: Cole a URL do script em SHEETS_URL             ║
+// ║  PASSO 3: Suba o arquivo no Netlify e pronto!            ║
+// ╚═══════════════════════════════════════════════════════════╝
+//
+// ── COMO CRIAR A PLANILHA ──────────────────────────────────
+//
+// 1. Acesse sheets.google.com → crie uma planilha nova
+//    Nomeie como: "Desafio 7D - Alunos Guardian Mind"
+//
+// 2. Na planilha, vá em:
+//    Extensões → Apps Script → apague tudo e cole este código:
+//
+//    ┌──────────────────────────────────────────────────┐
+//    │ function doPost(e) {                             │
+//    │   var sheet = SpreadsheetApp                     │
+//    │     .getActiveSpreadsheet()                      │
+//    │     .getActiveSheet();                           │
+//    │   var data = JSON.parse(e.postData.contents);    │
+//    │   // Cabeçalho automático na primeira vez        │
+//    │   if (sheet.getLastRow() === 0) {                │
+//    │     sheet.appendRow([                            │
+//    │       "Data/Hora","Evento","Nome",               │
+//    │       "Email","Dia","Progresso","Fase"           │
+//    │     ]);                                          │
+//    │   }                                              │
+//    │   sheet.appendRow([                              │
+//    │     new Date().toLocaleString("pt-BR"),          │
+//    │     data.evento,                                 │
+//    │     data.nome,                                   │
+//    │     data.email,                                  │
+//    │     data.dia || "—",                             │
+//    │     data.progresso || "0/7",                     │
+//    │     data.fase || "—"                             │
+//    │   ]);                                            │
+//    │   return ContentService                          │
+//    │     .createTextOutput("OK")                      │
+//    │     .setMimeType(ContentService.MimeType.TEXT);  │
+//    │ }                                                │
+//    └──────────────────────────────────────────────────┘
+//
+// 3. Clique em "Implantar" → "Nova implantação"
+//    → Tipo: "App da Web"
+//    → Executar como: "Eu (seu email)"
+//    → Quem pode acessar: "Qualquer pessoa"
+//    → Clique em "Implantar" e autorize
+//
+// 4. Copie a URL gerada (começa com https://script.google.com...)
+//    e cole abaixo substituindo o valor de SHEETS_URL:
+
+const SHEETS_URL = ""; 
+// ↑ Cole sua URL aqui entre as aspas. Exemplo:
+// "https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXX/exec"
+
+// ── O QUE É REGISTRADO NA PLANILHA ────────────────────────
+// ✅ CADASTRO     — quando o aluno entra no app pela 1ª vez
+// ✅ DIA_CONCLUIDO — a cada dia que ele finaliza (com qual dia e fase)
+// ✅ DESAFIO_COMPLETO — quando ele termina os 7 dias
+
+// ═══════════════════════════════════════════════════════
+// ENVIO PARA PLANILHA — não precisa editar abaixo
+// ═══════════════════════════════════════════════════════
+
+function sendToIntegrations(evento, extraData = {}) {
+  if (!SHEETS_URL) return; // Sem URL configurada, não faz nada
+
+  const payload = {
+    evento,
+    nome: state.name,
+    email: state.email,
+    data_inicio: state.startDate,
+    data_evento: new Date().toISOString(),
+    dias_concluidos: Object.keys(state.completed).length,
+    progresso: Object.keys(state.completed).length + "/7",
+    ...extraData
+  };
+
+  // Envia para o Google Sheets em background (não trava o app)
+  fetch(SHEETS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).catch(() => {}); // Falha silenciosamente se offline
+}
+
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const DAYS_DATA = [
+  {
+    day:1, phase:1, phaseName:"A RECONQUISTA", color:"#00d4ff",
+    title:"Desligue o Ruído", emoji:"🔇", duration:"10 MIN",
+    quote:"Você não está cansado. Está sobrecarregado de estímulos que não te pertencem.",
+    desc:"Vivemos bombardeados por notificações, comparações, preocupações. Hoje você aprende o primeiro princípio da Mente Guardiã: o Poder do Silêncio. O silêncio não é ausência de som — é presença de si mesmo.",
+    practice:"RITUAL DA HORA SAGRADA",
+    steps:["Escolha um local tranquilo. Sem telas, sem interrupções","Sente-se com a coluna ereta. Pés no chão, postura firme","Inspire pelo nariz por 4s → Segure 4s → Expire 8s","Repita o ciclo por 10 minutos. Mantenha o ritmo constante","Observe os pensamentos. Sem lutar — apenas perceba"],
+    breathPattern:[4,4,8,0], breathTipTitle:"DICA GUARDIÃ",
+    breathTip:"Use uma música ambiente leve (frequência 432hz ou som de natureza) enquanto pratica.",
+    journal:["Liste as 5 fontes principais de 'ruído' no seu dia (ex: WhatsApp, comparações, TV)","Quais dessas fontes você pode reduzir ou eliminar nas próximas 24 horas?"],
+    celebQuote:"O silêncio não é vazio — é onde sua força começa a se reconstruir."
+  },
+  {
+    day:2, phase:1, phaseName:"A RECONQUISTA", color:"#00d4ff",
+    title:"Reencontre o Centro", emoji:"🌀", duration:"5 MIN",
+    quote:"A mente vive no futuro. O corpo vive no agora. O equilíbrio começa quando os dois se reencontram.",
+    desc:"A ansiedade é a mente tentando viver o futuro antes da hora. A presença é o corpo lembrando que o agora é suficiente. A cada respiração consciente, o cérebro ativa o sistema parassimpático — reduz cortisol e restaura clareza.",
+    practice:"RESPIRAÇÃO QUÂNTICA GUARDIÃ (4×4×4×4)",
+    steps:["Inspire profundamente pelo nariz — 4 segundos","Segure o ar — 4 segundos","Expire lentamente pela boca — 4 segundos","Segure sem ar — 4 segundos","Visualize um Quadrado de Luz Azul se expandindo a cada ciclo","Repita por 5 minutos"],
+    breathPattern:[4,4,4,4], breathTipTitle:"VISUALIZAÇÃO GUARDIÃ",
+    breathTip:"Imagine um quadrado de luz azul se expandindo suavemente a cada ciclo. Este é seu Campo de Presença.",
+    journal:["Observe hoje 3 momentos em que sua mente fugiu para o futuro. Descreva-os.","O que você sentiu no corpo quando voltou para o agora? (calor, tensão, leveza...)"],
+    celebQuote:"Você não precisa controlar seus pensamentos. Só precisa lembrar que você é quem observa."
+  },
+  {
+    day:3, phase:1, phaseName:"A RECONQUISTA", color:"#00d4ff",
+    title:"Restaure o Foco", emoji:"🎯", duration:"7 MIN",
+    quote:"Foco não é fazer mais, é eliminar o que não importa.",
+    desc:"A mente dispersa é como uma lâmpada que emite luz, mas não esquenta. Quando você aprende a concentrar sua atenção, vira um laser: menos energia, mais impacto. O foco é o seu escudo.",
+    practice:"RITUAL DOS 7 MINUTOS",
+    steps:["Pegue um papel ou app de notas","Liste as 3 tarefas mais importantes do dia — o essencial que move você","Elimine 3 tarefas irrelevantes: delegue, adie ou delete","Feche os olhos por 3 minutos. Respire e visualize concluindo o essencial","Abra os olhos e diga em voz alta: 'Hoje eu escolho o essencial.'"],
+    breathPattern:[4,4,8,0], breathTipTitle:"ÂNCORA MENTAL",
+    breathTip:"Este ritual cria uma Âncora Mental de Foco Diário. Pratique sempre pela manhã para melhores resultados.",
+    journal:["Quais são as 3 coisas que, se eu fizer hoje, já tornam o dia produtivo?","O que posso eliminar esta semana para abrir espaço para o que realmente importa?"],
+    celebQuote:"O foco é o novo luxo da era digital. Quem domina a atenção, domina a realidade."
+  },
+  {
+    day:4, phase:2, phaseName:"A FORTALEZA", color:"#b026ff",
+    title:"Construa sua Disciplina Energética", emoji:"⚡", duration:"15 MIN",
+    quote:"A mente cria, mas é o corpo que sustenta o propósito.",
+    desc:"Quem domina o corpo, domina o instinto. Quem domina o instinto, domina o destino. A disciplina não é rigidez — é um ato de amor por si mesmo. É dizer: 'Eu sou importante o bastante para me manter forte todos os dias.'",
+    practice:"RITUAL GUARDIÃO DA MANHÃ (15 MIN)",
+    steps:["Respiração ativa (2 min): Inspire fundo e solte com força — 10 repetições","Postura de poder (2 min): Em pé, ombros abertos, respiração profunda","Movimento energético (5 min): Alongamento + 10 agachamentos + 10 flexões","Afirmação Guardiã (1 min): 'Eu desperto meu poder. Minha energia serve ao meu propósito.'","Planejamento leve (5 min): Liste 3 ações concretas para hoje"],
+    breathPattern:[4,0,4,0], breathTipTitle:"ATIVAÇÃO",
+    breathTip:"Use esta respiração antes do movimento energético para ativar o sistema nervoso simpático e aumentar o foco.",
+    journal:["O que me faz perder energia ao longo do dia?","O que posso eliminar ou reduzir para me fortalecer física e mentalmente?"],
+    celebQuote:"A disciplina não tira liberdade — ela cria. Hoje você ergueu os primeiros muros da sua Fortaleza interna."
+  },
+  {
+    day:5, phase:2, phaseName:"A FORTALEZA", color:"#b026ff",
+    title:"Proteja sua Energia", emoji:"🛡️", duration:"10 MIN",
+    quote:"Nem todo problema é seu. Aprenda a devolver o que não te pertence.",
+    desc:"Cada indivíduo possui uma frequência energética única. O que você permite entrar em seu campo energético define quem você está se tornando. É crucial estabelecer limites saudáveis e proteger sua energia de influências negativas.",
+    practice:"ESCUDO DE ENERGIA GUARDIÃ",
+    steps:["Feche os olhos e respire profundamente por 1 minuto","Visualize uma esfera de luz dourada ao redor de todo o seu corpo","Ao inspirar, repita mentalmente: 'Eu recebo energia pura e vital.'","Ao expirar, repita: 'Eu libero tudo o que não me pertence.'","Sinta o corpo mais leve e protegido a cada ciclo","Finalize dizendo em voz alta: 'Nada externo pode dominar meu estado interno.'"],
+    breathPattern:[4,4,6,0], breathTipTitle:"ESCUDO DOURADO",
+    breathTip:"Visualize a luz dourada se expandindo a cada inspiração e criando uma barreira protetora ao seu redor.",
+    journal:["Quais pessoas, situações ou hábitos drenam mais minha energia atualmente?","Como posso me proteger e estabelecer limites saudáveis sem me fechar para o mundo?"],
+    celebQuote:"Energia é presença, não resistência. Hoje você aprendeu a manter sua força sem endurecer o coração."
+  },
+  {
+    day:6, phase:3, phaseName:"O DOMÍNIO", color:"#ff26a0",
+    title:"O Mestre Interno", emoji:"👁️", duration:"10 MIN",
+    quote:"A mente é o servo, mas quando esquecemos quem manda, ela vira o tirano.",
+    desc:"Pensamentos surgem e somem como nuvens. Emoções passam como ondas. O que permanece é a consciência que observa tudo isso. O verdadeiro poder nasce quando você deixa de reagir e começa a perceber.",
+    practice:"EXERCÍCIO DO OBSERVADOR SILENCIOSO",
+    steps:["Sente-se em silêncio, com a respiração natural","Observe seus pensamentos como se fossem pássaros cruzando o céu","Não os siga, não lute contra eles — apenas perceba sua passagem","Quando vier uma emoção, diga internamente: 'Eu vejo você.'","Permaneça 10 minutos assim, sem esforço e sem julgamento"],
+    breathPattern:[4,4,4,4], breathTipTitle:"O OBSERVADOR",
+    breathTip:"Durante a respiração, pratique ser apenas o observador. Observe a própria respiração como se fosse de outra pessoa.",
+    journal:["Quais padrões de pensamento mais me dominam no dia a dia?","O que acontece internamente quando eu os observo sem reagir?"],
+    celebQuote:"O mestre não controla o mundo. Ele controla a si mesmo e o mundo o segue."
+  },
+  {
+    day:7, phase:3, phaseName:"O DOMÍNIO", color:"#ff26a0",
+    title:"A Mente Iluminada", emoji:"✨", duration:"10 MIN",
+    quote:"O propósito não é vencer o caos, mas enxergar a beleza oculta dentro dele.",
+    desc:"Você passou 7 dias reconquistando, fortalecendo e dominando sua mente. A Mente Guardiã não busca eliminar o caos — usa o caos como treino. Quando você deixa de lutar contra o mundo e começa a observá-lo com presença, tudo muda.",
+    practice:"VISUALIZAÇÃO DO GUARDIÃO",
+    steps:["Sente-se confortavelmente. Feche os olhos","Inspire profundamente e relaxe todo o corpo","Visualize-se como um Guardião, envolto em luz azul e dourada","Veja-se caminhando em meio ao caos — e o caos se reorganizando à sua volta","Repita mentalmente: 'Eu sou a paz em meio à tempestade.'","Permaneça nesse estado por 10 minutos"],
+    breathPattern:[4,4,4,4], breathTipTitle:"INTEGRAÇÃO FINAL",
+    breathTip:"Esta é sua última respiração guiada do desafio. Honre os 7 dias de prática que você completou.",
+    journal:["O que mudou em mim ao longo desses 7 dias? O que percebi sobre minha mente?","Como posso integrar esses aprendizados à minha rotina diária daqui para frente?"],
+    celebQuote:"Você não é mais um sobrevivente. Você é um estrategista — um Guardião."
+  }
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════════════
+let state = {
+  name: "", email: "", startDate: null,
+  completed: {}, journal: {}
+};
+
+function saveState() { localStorage.setItem("gm_7d_v2", JSON.stringify(state)); }
+function loadState() {
+  const s = localStorage.getItem("gm_7d_v2");
+  if (s) { try { state = JSON.parse(s); return true; } catch(e){} }
+  return false;
+}
+
+// How many days are unlocked based on start date
+function getUnlockedDays() {
+  if (!state.startDate) return 0;
+  const start = new Date(state.startDate);
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return Math.min(diff + 1, 7); // day 1 unlocked from day 0 elapsed
+}
+
+// ═══════════════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════════════
+function initParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#00d4ff', '#b026ff', '#ff26a0'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${size}px;height:${size}px;
+      background:${colors[i%3]};
+      opacity:${Math.random()*0.4+0.05};
+      animation-duration:${Math.random()*15+10}s;
+      animation-delay:${Math.random()*10}s;
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SCREEN ROUTING
+// ═══════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════
+// REGISTER
+// ═══════════════════════════════════════════════════════
+function startChallenge() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  if (!name) { shakeInput('reg-name'); return; }
+  if (!email || !email.includes('@')) { shakeInput('reg-email'); return; }
+  state.name = name;
+  state.email = email;
+  state.startDate = new Date().toISOString();
+  state.completed = {};
+  state.journal = {};
+  saveState();
+  // 🔗 Integrations: dispara para Google Sheets, EmailJS, ActiveCampaign, Webhook
+  sendToIntegrations("CADASTRO", { dia: "início", origem: "Desafio 7D" });
+  renderHome();
+  showScreen('home');
+}
+
+function shakeInput(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#ff4466';
+  el.style.animation = 'shake 0.3s ease';
+  setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
+}
+
+// ═══════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════
+function renderHome() {
+  const unlocked = getUnlockedDays();
+  const done = Object.keys(state.completed).length;
+  document.getElementById('home-username').textContent = state.name.toUpperCase();
+
+  // Progress ring
+  const circ = 2 * Math.PI * 26;
+  const pct = (done / 7) * circ;
+  document.getElementById('progress-circle').setAttribute('stroke-dasharray', `${pct} ${circ}`);
+  document.getElementById('progress-text').textContent = done;
+  document.getElementById('progress-count-text').textContent = `${done} de 7 dias`;
+  document.getElementById('progress-bar').style.width = `${(done/7)*100}%`;
+
+  // Sub text
+  const msgs = ['Pronto para começar?','Continue assim! 💪','Ótimo ritmo! 🔥','Na metade! 🌀','Quase lá! ⚡','Mais um passo! 🛡️','Último dia! ✨','COMPLETO! 🏆'];
+  document.getElementById('progress-sub-text').textContent = msgs[done] || '';
+
+  // Phase counts
+  document.getElementById('phase1-count').textContent = [1,2,3].filter(d=>state.completed[d]).length + '/3';
+  document.getElementById('phase2-count').textContent = [4,5].filter(d=>state.completed[d]).length + '/2';
+  document.getElementById('phase3-count').textContent = [6,7].filter(d=>state.completed[d]).length + '/2';
+
+  // Days grid
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+  DAYS_DATA.forEach(d => {
+    const isUnlocked = d.day <= unlocked;
+    const isDone = !!state.completed[d.day];
+    const isNext = d.day === Math.min(unlocked, 7) && !isDone;
+    const phClass = d.phase === 2 ? 'phase2' : d.phase === 3 ? 'phase3' : '';
+    let cls = `day-cell ${phClass}`;
+    if (isDone) cls += ' done';
+    if (isNext) cls += ' active';
+    if (!isUnlocked) cls += ' locked';
+    const cell = document.createElement('div');
+    cell.className = cls;
+    cell.innerHTML = `<span class="day-cell-emoji">${isDone ? '✓' : !isUnlocked ? '🔒' : d.emoji}</span><span class="day-cell-num" style="color:${isDone?d.color:''}">${isDone?'D'+d.day:'D'+d.day}</span>`;
+    if (isUnlocked) cell.onclick = () => openDay(d.day);
+    grid.appendChild(cell);
+  });
+
+  // Main button
+  const btn = document.getElementById('home-main-btn');
+  const lockedMsg = document.getElementById('locked-msg');
+  if (done === 7) {
+    btn.style.display = 'block';
+    btn.textContent = 'VER CONCLUSÃO 🏆';
+    btn.onclick = () => showScreen('complete');
+    lockedMsg.style.display = 'none';
+  } else {
+    const nextDay = Math.min(unlocked, 7);
+    if (nextDay < 1) {
+      btn.style.display = 'none';
+      lockedMsg.style.display = 'block';
+      lockedMsg.textContent = 'JORNADA COMEÇA AMANHÃ';
+    } else if (state.completed[nextDay] && nextDay < 7) {
+      // All unlocked days done, waiting for next
+      const hoursLeft = getHoursUntilNextUnlock();
+      btn.style.display = 'none';
+      lockedMsg.style.display = 'block';
+      lockedMsg.textContent = `✓ DIA ${nextDay} CONCLUÍDO · DIA ${nextDay+1} EM ${hoursLeft}`;
+    } else {
+      btn.style.display = 'block';
+      btn.textContent = `IR PARA O DIA ${nextDay} ${DAYS_DATA[nextDay-1].emoji}`;
+      btn.onclick = () => openDay(nextDay);
+      lockedMsg.style.display = 'none';
+    }
+  }
+}
+
+function getHoursUntilNextUnlock() {
+  if (!state.startDate) return '24h';
+  const start = new Date(state.startDate);
+  const unlocked = getUnlockedDays();
+  const nextUnlock = new Date(start);
+  nextUnlock.setDate(nextUnlock.getDate() + unlocked);
+  const diff = nextUnlock - new Date();
+  const hours = Math.max(0, Math.floor(diff / (1000 * 60 * 60)));
+  const mins = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
+  return `${hours}h${mins > 0 ? mins + 'm' : ''}`;
+}
+
+function goToCurrentDay() {
+  const unlocked = getUnlockedDays();
+  if (unlocked >= 1) openDay(Math.min(unlocked, 7));
+}
+
+// ═══════════════════════════════════════════════════════
+// DAY VIEW
+// ═══════════════════════════════════════════════════════
+let currentDayNum = 1;
+let breathRunning = false;
+let breathInterval = null;
+let breathPhase = 0;
+let breathCount = 0;
+
+function openDay(num) {
+  currentDayNum = num;
+  const d = DAYS_DATA[num - 1];
+  const color = d.color;
+  const isDone = !!state.completed[num];
+
+  // Topbar
+  document.getElementById('tb-phase').textContent = d.phaseName;
+  document.getElementById('tb-phase').style.color = color;
+  document.getElementById('tb-day').textContent = 'DIA ' + num;
+  const dur = document.getElementById('tb-duration');
+  dur.textContent = d.duration;
+  dur.style.background = color + '22';
+  dur.style.border = `1px solid ${color}55`;
+  dur.style.color = color;
+
+  // Hero
+  document.getElementById('day-emoji').textContent = d.emoji;
+  document.getElementById('day-title').textContent = d.title;
+  const qc = document.getElementById('day-quote-card');
+  qc.style.background = color + '12';
+  qc.style.borderLeftColor = color;
+  document.getElementById('day-quote').textContent = '"' + d.quote + '"';
+  document.getElementById('day-quote').style.color = color;
+  const descEl = document.getElementById('day-desc'); descEl.textContent = d.desc; descEl.style.color = '#bccede';
+
+  // Practice
+  document.getElementById('practice-title').textContent = d.practice;
+  document.getElementById('practice-title').style.color = color;
+  document.getElementById('practice-card').style.border = `1px solid ${color}33`;
+  const stepsList = document.getElementById('steps-list');
+  stepsList.innerHTML = '';
+  d.steps.forEach((step, i) => {
+    const item = document.createElement('div');
+    item.className = 'step-item';
+    item.innerHTML = `
+      <div class="step-num" style="color:${color};border-color:${color}">${i+1}</div>
+      <div class="step-text">${step}</div>`;
+    stepsList.appendChild(item);
+  });
+
+  // Breathing setup
+  stopBreath();
+  const bc = document.getElementById('breath-circle');
+  bc.style.borderColor = color;
+  bc.style.background = color + '10';
+  document.getElementById('breath-label').style.color = color;
+  document.getElementById('breath-count').style.color = '#fff';
+  document.getElementById('breath-tip-label').textContent = d.breathTipTitle;
+  document.getElementById('breath-tip-label').style.color = color;
+  document.getElementById('breath-tip-text').textContent = d.breathTip;
+
+  // Journal
+  const jq = document.getElementById('journal-questions');
+  jq.innerHTML = '';
+  d.journal.forEach((q, i) => {
+    const saved = (state.journal[num] || ['',''])[i] || '';
+    const card = document.createElement('div');
+    card.className = 'journal-card';
+    card.style.borderColor = color + '33';
+    card.innerHTML = `
+      <div class="journal-question" style="color:${color}">"${q}"</div>
+      <textarea class="journal-textarea" id="j${num}_${i}" rows="4" placeholder="Escreva aqui sua reflexão..." style="border-color:${color}22">${saved}</textarea>`;
+    jq.appendChild(card);
+  });
+
+  // Complete / Done state
+  const cw = document.getElementById('complete-wrap');
+  const db = document.getElementById('done-badge');
+  const btn = document.getElementById('complete-btn');
+  if (isDone) {
+    cw.style.display = 'none';
+    db.style.display = 'flex';
+    const dc = document.getElementById('done-check');
+    dc.style.background = color + '22';
+    dc.style.border = `2px solid ${color}`;
+    dc.style.color = color;
+    document.getElementById('done-label').textContent = `DIA ${num} CONCLUÍDO`;
+    document.getElementById('done-label').style.color = color;
+    const nb = document.getElementById('next-btn');
+    if (num < 7 && getUnlockedDays() > num) {
+      nb.style.display = 'block';
+      nb.textContent = `IR PARA O DIA ${num+1} →`;
+      nb.style.color = DAYS_DATA[num].color;
+      nb.style.border = `1px solid ${DAYS_DATA[num].color}`;
+      nb.style.background = 'transparent';
+      nb.style.borderRadius = '50px';
+    } else { nb.style.display = 'none'; }
+  } else {
+    cw.style.display = 'flex';
+    db.style.display = 'none';
+    btn.textContent = `CONCLUIR DIA ${num} 🛡️`;
+    btn.style.background = `linear-gradient(135deg, ${color}, ${color}99)`;
+    btn.style.color = num <= 3 ? '#000' : '#fff';
+    btn.style.boxShadow = `0 0 30px ${color}44`;
+  }
+
+  // Mini nav
+  const nav = document.getElementById('day-mini-nav');
+  nav.innerHTML = '';
+  const unlocked = getUnlockedDays();
+  DAYS_DATA.forEach(dd => {
+    const dot = document.createElement('div');
+    dot.className = 'mini-dot';
+    const isUnlocked2 = dd.day <= unlocked;
+    const isDone2 = !!state.completed[dd.day];
+    if (dd.day === num) { dot.classList.add('current'); dot.style.background = dd.color; dot.style.color = '#000'; dot.style.border = `1px solid ${dd.color}`; }
+    else if (isDone2) { dot.style.color = dd.color; dot.style.border = `1px solid ${dd.color}44`; }
+    else if (!isUnlocked2) { dot.classList.add('locked-d'); }
+    dot.textContent = dd.day;
+    if (isUnlocked2) dot.onclick = () => { stopBreath(); openDay(dd.day); };
+    nav.appendChild(dot);
+  });
+
+  switchTab('practice');
+  showScreen('day');
+}
+
+function switchTab(tab) {
+  ['practice','breath','journal'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active', t===tab);
+  });
+  const color = DAYS_DATA[currentDayNum-1].color;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = '#a0b4c8';
+  });
+  const activeBtn = document.getElementById('tab-'+tab+'-btn');
+  activeBtn.style.background = color;
+  activeBtn.style.color = currentDayNum <= 3 ? '#000' : '#fff';
+  if (tab !== 'breath') stopBreath();
+}
+
+// ═══════════════════════════════════════════════════════
+// BREATHING TIMER
+// ═══════════════════════════════════════════════════════
+const BREATH_LABELS = ['Inspire', 'Segure', 'Expire', 'Segure'];
+const BREATH_SCALES = [1.35, 1.35, 0.85, 0.85];
+
+function toggleBreath() {
+  if (breathRunning) stopBreath();
+  else startBreath();
+}
+
+function startBreath() {
+  const d = DAYS_DATA[currentDayNum-1];
+  const pattern = d.breathPattern;
+  breathRunning = true;
+  breathPhase = 0;
+  breathCount = pattern[0];
+  document.getElementById('breath-count').style.display = 'block';
+  renderBreath(d, pattern);
+  breathInterval = setInterval(() => {
+    breathCount--;
+    if (breathCount <= 0) {
+      // skip phases with 0 duration
+      do { breathPhase = (breathPhase + 1) % 4; } while (pattern[breathPhase] === 0);
+      breathCount = pattern[breathPhase];
+    }
+    renderBreath(d, pattern);
+  }, 1000);
+}
+
+function renderBreath(d, pattern) {
+  const colors = ['#00d4ff','#b026ff','#ff26a0','#b026ff'];
+  const phColor = d.color;
+  const circle = document.getElementById('breath-circle');
+  const label = document.getElementById('breath-label');
+  const count = document.getElementById('breath-count');
+  label.textContent = BREATH_LABELS[breathPhase];
+  label.style.color = phColor;
+  count.textContent = breathCount;
+  circle.style.transform = `scale(${BREATH_SCALES[breathPhase]})`;
+  circle.style.boxShadow = `0 0 ${breathPhase===0?50:20}px ${phColor}${breathPhase===0?'99':'44'}`;
+  circle.style.background = phColor + (breathPhase===0?'22':'08');
+}
+
+function stopBreath() {
+  if (breathInterval) clearInterval(breathInterval);
+  breathRunning = false;
+  breathInterval = null;
+  const circle = document.getElementById('breath-circle');
+  if (circle) {
+    circle.style.transform = 'scale(1)';
+    circle.style.boxShadow = 'none';
+    document.getElementById('breath-label').textContent = 'INICIAR';
+    document.getElementById('breath-count').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPLETE DAY
+// ═══════════════════════════════════════════════════════
+function completeDay() {
+  const d = DAYS_DATA[currentDayNum-1];
+  // Save journal
+  const j0 = document.getElementById(`j${currentDayNum}_0`);
+  const j1 = document.getElementById(`j${currentDayNum}_1`);
+  state.journal[currentDayNum] = [j0?j0.value:'', j1?j1.value:''];
+  state.completed[currentDayNum] = true;
+  saveState();
+  // 🔗 Integrations: envia conclusão do dia
+  sendToIntegrations("DIA_CONCLUIDO", {
+    dia: currentDayNum,
+    titulo: DAYS_DATA[currentDayNum-1].title,
+    fase: DAYS_DATA[currentDayNum-1].phaseName
+  });
+  // Se foi o último dia, envia evento de conclusão total
+  if (Object.keys(state.completed).length === 7) {
+    sendToIntegrations("DESAFIO_COMPLETO", { dia: 7 });
+  }
+  stopBreath();
+
+  // Celebration screen
+  document.getElementById('cel-emoji').textContent = d.emoji;
+  document.getElementById('cel-day-label').textContent = `DIA ${d.day} • ${d.phaseName}`;
+  document.getElementById('cel-day-label').style.color = d.color;
+  document.getElementById('cel-title').textContent = d.title.toUpperCase() + ' ✓';
+  document.getElementById('cel-title').style.color = d.color;
+  document.getElementById('cel-quote').textContent = '"' + d.celebQuote + '"';
+  showScreen('celebrate');
+
+  setTimeout(() => {
+    if (Object.keys(state.completed).length === 7) {
+      showScreen('complete');
+    } else {
+      renderHome();
+      showScreen('home');
+    }
+  }, 3000);
+}
+
+function goNextDay() {
+  stopBreath();
+  openDay(currentDayNum + 1);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initParticles();
+  // Add shake animation
+  const style = document.createElement('style');
+  style.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }`;
+  document.head.appendChild(style);
+
+  if (loadState() && state.name && state.email && state.startDate) {
+    renderHome();
+    showScreen('home');
+  } else {
+    showScreen('register');
+  }
+});
+</script>
+</body>
+</html>
